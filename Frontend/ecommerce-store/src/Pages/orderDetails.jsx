@@ -192,7 +192,7 @@ export default function OrderDetails() {
               onClick={handleDeleteOrder}
               className="flex h-9 items-center gap-2 rounded-md bg-red-50 px-4 cursor-pointer text-sm font-medium text-red-500 transition  hover:bg-red-100"
             >
-              <Trash2 size={16} className="cursor-pointer" />
+              <Trash2 size={16} className="cursor-pointer" />git 
 
               <span>Delete Order</span>
             </button>
