@@ -45,7 +45,7 @@ app.use("/", router);
 
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/ecommerce-store")
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("=================================");
     console.log("Mongoose Connected");
