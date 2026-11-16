@@ -13,7 +13,7 @@ export const ProductController = async (req, res) => {
       price,
       image,
       description,
-      user: req.users?._id,
+      user: req.user?._id,
     });
     console.log("Product =>", product);
     return res.status(200).json({ product });

@@ -18,30 +18,34 @@ export default function CreateProducts() {
       ? Number(price) - (Number(price) * Number(discount)) / 100
       : Number(price) || 0;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    dispatch(
-      createProductThunk({
-        name,
-        file,
-        discount,
-        price,
-        discountPrice,
-        quantity,
-        description,
-      }),
-    );
+    try {
+      await dispatch(
+        createProductThunk({
+          name,
+          file,
+          discount,
+          price,
+          discountPrice,
+          quantity,
+          description,
+        }),
+      ).unwrap();
 
-    setName("");
-    setFile(null);
-    setDiscount("");
-    setPrice("");
-    setQuantity("");
-    setDescription("");
+      setName("");
+      setFile(null);
+      setDiscount("");
+      setPrice("");
+      setQuantity("");
+      setDescription("");
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Product creation failed:", error);
     }
   };
 
@@ -59,6 +63,7 @@ export default function CreateProducts() {
 
             <input
               type="text"
+              required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter product name"
@@ -77,6 +82,7 @@ export default function CreateProducts() {
               <input
                 type="number"
                 min="0"
+                required
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="Enter price"
@@ -125,6 +131,7 @@ export default function CreateProducts() {
             <input
               type="number"
               min="0"
+              required
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Enter quantity"
@@ -155,6 +162,7 @@ export default function CreateProducts() {
 
             <textarea
               rows="2"
+              required
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter product description..."
