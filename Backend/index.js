@@ -16,7 +16,8 @@ const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 // 1. CORS configuration
 const allowedOrigins = [
-  process.env.FRONTEND_URL?.replace(/\/+$/, ""),
+  process.env.FRONTEND_URL?.trim().replace(/\/+$/, ""),
+  "https://ecommerce-store.hanzlashahzad41.workers.dev",
 ].filter(Boolean);
 
 if (process.env.NODE_ENV !== "production") {

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Order from "../Models/OrderSchema.js";
 import { normalizeMongoId } from "../Utils/mongoId.js";
 import markOrderPaid from "../Utils/markOrderPaid.js";
+import getClientUrl from "../Utils/clientUrl.js";
 
 const Stripe = new stripe(process.env.STRIPE_SECRET_KEY);
 const DELIVERY_FEE = 200;
@@ -14,13 +15,7 @@ export default async function createCheckoutSession(req, res) {
       return res.status(400).json({ success: false, message: "Invalid order ID." });
     }
 
-    const clientUrl = process.env.CLIENT_URL?.trim().replace(/\/+$/, "");
-    if (!clientUrl) {
-      return res.status(500).json({
-        success: false,
-        message: "Checkout is not configured.",
-      });
-    }
+    const clientUrl = getClientUrl();
 
     const order = await Order.findById(orderId).populate({
       path: "cartItems.product",

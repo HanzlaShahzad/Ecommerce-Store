@@ -4,6 +4,7 @@ Frontend/ecommerce-store/node_modules/
 Backend/uploads/
 .env
 .env.*
+!Frontend/.env.production
 dist/
 build/
 .DS_Store

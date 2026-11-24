@@ -1,14 +1,15 @@
 import nodemailer from "nodemailer";
+import getClientUrl from "./clientUrl.js";
 
 export default async function sendEmailVerification(email, token) {
   try {
     const emailUser = process.env.EMAIL_USER?.trim();
     const emailPass = process.env.EMAIL_PASS?.replace(/\s/g, "");
-    const clientUrl = process.env.CLIENT_URL?.trim();
+    const clientUrl = getClientUrl();
 
-    if (!emailUser || !emailPass || !clientUrl) {
+    if (!emailUser || !emailPass) {
       throw new Error(
-        "Email service is not configured. Set EMAIL_USER, EMAIL_PASS, and CLIENT_URL.",
+        "Email service is not configured. Set EMAIL_USER and EMAIL_PASS.",
       );
     }
 

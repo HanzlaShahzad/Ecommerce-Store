@@ -29,8 +29,12 @@ production credentials in source control:
 | `CLoudinary_Api_Key` | Cloudinary API key |
 | `CLoudinary_Api_Secret` | Cloudinary API secret |
 
-Set `FRONTEND_URL` to the frontend origin without a trailing slash. Configure
-the Stripe webhook to call `https://<backend-origin>/stripe-webhook` and copy
-its signing secret into `WEBHOOK_SECRET_KEY`. The frontend separately needs
-`VITE_API_URL` set to the backend origin when frontend and backend are hosted
-on different domains.
+For this deployment, set `FRONTEND_URL` and `CLIENT_URL` to
+`https://ecommerce-store.hanzlashahzad41.workers.dev` and
+`VITE_API_URL` in the frontend to
+`https://ecommerce-store-coral-ten.vercel.app`. Set the Vercel variables in
+Project Settings > Environment Variables, then redeploy. The backend also
+allows the Cloudflare origin by default for CORS. Configure the Stripe webhook
+to call
+`https://ecommerce-store-coral-ten.vercel.app/stripe-webhook` and copy its
+signing secret into `WEBHOOK_SECRET_KEY`.
