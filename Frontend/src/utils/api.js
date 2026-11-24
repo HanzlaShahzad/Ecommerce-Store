@@ -1,10 +1,9 @@
 import axios from "axios";
 import { isSessionTokenValid } from "./auth";
 
-const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
-const defaultApiUrl = "https://ecommerce-store-coral-ten.vercel.app";
+// const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const defaultApiUrl = "https://shop-nest-git-main-hanzla-s-team.vercel.app";
 export const API_BASE_URL = (
-  configuredApiUrl ||
   defaultApiUrl
 ).replace(/\/+$/, "");
 
