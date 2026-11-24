@@ -2,6 +2,7 @@ import stripe from "stripe";
 import mongoose from "mongoose";
 import Order from "../Models/OrderSchema.js";
 import { normalizeMongoId } from "../Utils/mongoId.js";
+import markOrderPaid from "../Utils/markOrderPaid.js";
 
 const Stripe = new stripe(process.env.STRIPE_SECRET_KEY);
 const DELIVERY_FEE = 200;
@@ -131,17 +132,34 @@ export default async function createCheckoutSession(req, res) {
 export async function getCheckoutSessionStatus(req, res) {
   try {
     const session = await Stripe.checkout.sessions.retrieve(req.params.sessionId);
-    if (session.metadata?.userId !== req.user._id.toString()) {
+    const orderId = session.metadata?.orderId;
+    const userId = session.metadata?.userId;
+    if (!orderId || userId !== req.user._id.toString()) {
       return res.status(404).json({
         success: false,
         message: "Checkout session not found.",
       });
     }
 
+    const paid = session.payment_status === "paid";
+    if (paid) {
+      const orderUpdated = await markOrderPaid({
+        orderId,
+        userId,
+        sessionId: session.id,
+      });
+      if (!orderUpdated) {
+        return res.status(409).json({
+          success: false,
+          message: "Payment is confirmed, but the order could not be updated. Please contact support.",
+        });
+      }
+    }
+
     return res.status(200).json({
       success: true,
-      paid: session.payment_status === "paid",
-      orderId: session.metadata.orderId,
+      paid,
+      orderId,
     });
   } catch (error) {
     console.error("Stripe session verification failed:", error.message);

@@ -1,5 +1,5 @@
 import stripe from "stripe";
-import Order from "../Models/OrderSchema.js";
+import markOrderPaid from "../Utils/markOrderPaid.js";
 
 const Stripe = new stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -13,47 +13,32 @@ export default async function StripeWebhook(req, res) {
       process.env.WEBHOOK_SECRET_KEY
     );
 
-    if (event.type === "checkout.session.completed") {
+    if (
+      event.type === "checkout.session.completed" ||
+      event.type === "checkout.session.async_payment_succeeded"
+    ) {
       const session = event.data.object;
       const orderId = session.metadata?.orderId;
+      const userId = session.metadata?.userId;
 
-      if (!orderId) {
+      if (!orderId || !userId) {
         return res.status(400).json({
           success: false,
-          message: "Order ID missing from Stripe metadata",
+          message: "Order details missing from Stripe metadata",
         });
       }
 
       if (session.payment_status === "paid") {
-        const updatedOrder = await Order.findOneAndUpdate(
-          {
-            _id: orderId,
-            user: session.metadata?.userId,
-            stripeSessionId: session.id,
-            paymentStatus: { $ne: "paid" },
-          },
-          {
-            paymentStatus: "paid",
-            orderStatus: "confirmed",
-            stripeSessionId: session.id,
-            paymentDate: new Date(),
-          },
-          { new: true }
-        );
-
-        if (!updatedOrder) {
-          const alreadyProcessed = await Order.exists({
-            _id: orderId,
-            user: session.metadata?.userId,
-            stripeSessionId: session.id,
-            paymentStatus: "paid",
+        const orderUpdated = await markOrderPaid({
+          orderId,
+          userId,
+          sessionId: session.id,
+        });
+        if (!orderUpdated) {
+          return res.status(500).json({
+            success: false,
+            message: "Unable to update the paid order.",
           });
-          if (!alreadyProcessed) {
-            return res.status(500).json({
-              success: false,
-              message: "Unable to update the paid order.",
-            });
-          }
         }
       }
     }
