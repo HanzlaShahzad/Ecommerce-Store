@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AiOutlinePhone, AiOutlineProduct } from "react-icons/ai";
 import { IoHomeOutline } from "react-icons/io5";
 import { LuLayoutDashboard, LuUsers } from "react-icons/lu";
 import { NavLink } from "react-router-dom";
 import { TiDelete } from "react-icons/ti";
 import { TbLayoutSidebarLeftExpand } from "react-icons/tb";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { ImYelp } from "react-icons/im";
-import { getUser } from "../Thunks/userThunk";
 import { BsBorderStyle } from "react-icons/bs";
 
 export default function Sidebar() {
   const user = useSelector((state) => state.signin?.data?.user);
-  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   console.log("Userr ===>", user);
   const navClass = ({ isActive }) =>
@@ -20,9 +18,6 @@ export default function Sidebar() {
       ? "group flex w-full items-center gap-4 rounded-xl bg-[#edf2fb] px-4 py-3 text-left text-[15px] transition hover:bg-[#edf2fb]"
       : "group flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left text-[15px] transition hover:bg-[#edf2fb]";
 
-  useEffect(() => {
-    dispatch(getUser());
-  }, [dispatch]);
   return (
     <>
       {/* ================= SIDEBAR ================= */}

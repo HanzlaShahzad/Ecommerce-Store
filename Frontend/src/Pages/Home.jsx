@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getProductThunk, updateProductThunk } from "../Thunks/productThunk";
 import { useNavigate } from "react-router-dom";
 import { FaDeleteLeft } from "react-icons/fa6";
-import axios from "axios";
 import { MdEditNote } from "react-icons/md";
+import { getProductImageUrl } from "../utils/productImage";
 import {
   addToCart,
   increaseQuantitys,
@@ -36,7 +36,12 @@ export default function Home() {
     }
   }, [data]);
 
-  const products = localProducts;
+  const products = localProducts.filter(
+    (product) =>
+      product?.deleted !== true &&
+      product?.status !== "Inactive" &&
+      product?.status !== "InActive",
+  );
 
   // PRICE CALCULATION
   const getDiscountedPrice = (price, discount) => {
@@ -257,7 +262,7 @@ export default function Home() {
                     >
                       {product.image ? (
                         <img
-                          src={`http://localhost:2000/uploads/${product.image}`}
+                          src={getProductImageUrl(product.image)}
                           alt={product.name}
                           className="
                               h-full
@@ -318,6 +323,7 @@ export default function Home() {
                         type="button"
                         disabled={
                           Number(product.quantity) <= 0 ||
+                          product.status === "Inactive" ||
                           product.status === "InActive"
                         }
                         onClick={(e) => {
@@ -351,6 +357,7 @@ export default function Home() {
 
                             ${
                               Number(product.quantity) <= 0 ||
+                              product.status === "Inactive" ||
                               product.status === "InActive"
                                 ? "cursor-not-allowed bg-gray-400"
                                 : "bg-orange-500 hover:scale-110 hover:bg-orange-600"
@@ -726,7 +733,7 @@ export default function Home() {
                           "
                         >
                           <img
-                            src={`http://localhost:2000/uploads/${item.image}`}
+                            src={getProductImageUrl(item.image)}
                             alt={item.name}
                             className="
                               h-full

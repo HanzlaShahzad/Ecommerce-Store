@@ -4,11 +4,14 @@ import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import router from "./Routes/router.js";
 import StripeWebhook from "./Controller/stripeWebhook.js";
 
 const app = express();
+const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 // 1. CORS configuration
 const allowedOrigins = [
@@ -74,6 +77,7 @@ app.post(
 
 // 4. JSON middleware
 app.use(express.json());
+app.use("/uploads", express.static(path.join(backendDirectory, "uploads")));
 
 // 5. Application routes
 app.use("/", router);

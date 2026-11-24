@@ -1,9 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const URL = axios.create({
-  baseURL: "http://localhost:2000",
-});
+import URL from "../utils/api";
 
 export const createProductThunk = createAsyncThunk(
   "createProductThunk",
@@ -94,8 +90,13 @@ export const updateProductThunk = createAsyncThunk(
   async ({ id, formData }, { rejectWithValue }) => {
     try {
       formData.append("id", id);
+      const token = localStorage.getItem("token");
 
-      const res = await URL.patch("/updateProducts", formData);
+      const res = await URL.patch("/updateProducts", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       console.log("updateProductThunk RESPONSE =>", res.data);
 

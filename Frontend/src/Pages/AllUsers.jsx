@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../Thunks/userThunk";
 import { getOrder } from "../Thunks/stripeThunk";
+import { getProductImageUrl } from "../utils/productImage";
 
 export default function AllUsers() {
   const { data, pending, error } = useSelector((state) => state.getUser);
@@ -596,7 +597,7 @@ export default function AllUsers() {
                                     <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white">
                                       {product?.image ? (
                                         <img
-                                          src={`http://localhost:2000/uploads/${product.image}`}
+                                          src={getProductImageUrl(product.image)}
                                           alt={product?.name || "Product"}
                                           className="h-full w-full object-cover"
                                         />

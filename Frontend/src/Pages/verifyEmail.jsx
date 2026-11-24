@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 
 export default function VerifyEmail() {
   const { token } = useParams();
@@ -16,9 +16,7 @@ export default function VerifyEmail() {
         setLoading(true);
         setErrorMessage("");
 
-        const res = await axios.get(
-          `http://localhost:2000/verify-email/${token}`,
-        );
+        const res = await api.get(`/verify-email/${token}`);
 
         if (res.data?.success) {
           setVerified(true);

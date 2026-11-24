@@ -1,16 +1,19 @@
 import stripe from "stripe";
+import mongoose from "mongoose";
+import { normalizeMongoId } from "../Utils/mongoId.js";
 
 const Stripe = new stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function createCheckoutSession(req, res) {
   try {
-    const { cartItems, orderId } = req.body;
+    const { cartItems } = req.body;
+    const orderId = normalizeMongoId(req.body.orderId);
 
     console.log("cartItems :", cartItems);
     console.log("orderId :", orderId);
 
-    if (!orderId) {
-      res.status(400).json("order is missing");
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({ success: false, message: "Invalid order ID" });
     }
 
     if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
@@ -22,6 +25,13 @@ export default async function createCheckoutSession(req, res) {
     const line_items = cartItems.map((product) => {
       const price = Number(product.price) || 0;
       const discount = Number(product.discount) || 0;
+      const imageUrl = product.image
+        ? /^https?:\/\//i.test(product.image)
+          ? product.image
+          : `${(process.env.BACKEND_URL || "http://localhost:2000").replace(
+              /\/+$/,
+            )}/uploads/${encodeURIComponent(product.image)}`
+        : null;
 
       // Quantity of THIS product
       const quantity = Number(product.quantity) || 1;
@@ -37,9 +47,7 @@ export default async function createCheckoutSession(req, res) {
           product_data: {
             name: product.name,
 
-            images: product.image
-              ? [`http://localhost:2000/uploads/${product.image}`]
-              : [],
+            images: imageUrl ? [imageUrl] : [],
           },
 
           // Stripe expects amount in smallest currency unit

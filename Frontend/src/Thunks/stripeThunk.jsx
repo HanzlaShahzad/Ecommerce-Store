@@ -1,9 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const URL = axios.create({
-  baseURL: "http://localhost:2000",
-});
+import URL from "../utils/api";
 
 export const stripeThunk = createAsyncThunk(
   "stripeThunk",
@@ -80,7 +76,7 @@ export const getOrder = createAsyncThunk(
         });
       }
 
-      const res = await axios.get(`http://localhost:2000/myOrders/${id}`, {
+      const res = await URL.get(`/myOrders/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

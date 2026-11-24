@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getOrder } from "../Thunks/stripeThunk";
+import { getProductImageUrl } from "../utils/productImage";
 
 export default function MyOrders() {
   const { orders, pending, error } = useSelector((state) => state.getOrders);
@@ -162,7 +163,7 @@ export default function MyOrders() {
                               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white sm:h-24 sm:w-24">
                                 {product?.image ? (
                                   <img
-                                    src={`http://localhost:2000/uploads/${product.image}`}
+                                    src={getProductImageUrl(product.image)}
                                     alt={product?.name || "Product"}
                                     className="h-full w-full object-cover"
                                   />

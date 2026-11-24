@@ -13,7 +13,7 @@ const orderSlice = createSlice({
       state.pending = false;
       state.error = true;
     }),
-      builder.addcase(createOrder.pending, (state) => {
+      builder.addCase(createOrder.pending, (state) => {
         state.error = false;
         state.pending = true;
       }),

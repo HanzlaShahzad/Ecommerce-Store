@@ -1,9 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const URL = axios.create({
-  baseURL: "http://localhost:2000",
-});
+import URL from "../utils/api";
 
 export const getChartThunk = createAsyncThunk(
   "getChartThunk",

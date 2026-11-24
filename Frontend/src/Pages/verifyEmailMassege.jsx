@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 
 export default function VerifyEmailMessage() {
   const navigate = useNavigate();
@@ -47,12 +47,9 @@ export default function VerifyEmailMessage() {
     try {
       setResending(true);
 
-      const res = await axios.post(
-        "http://localhost:2000/resend-verification",
-        {
-          email: email.trim(),
-        },
-      );
+      const res = await api.post("/resend-verification", {
+        email: email.trim(),
+      });
 
       setSuccessMessage(
         res.data?.message || "A new verification email has been sent.",

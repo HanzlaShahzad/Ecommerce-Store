@@ -7,7 +7,6 @@ import { ResendVerificationEmail } from "../Utils/resendVerificationEmail.js";
 import createCheckoutSession from "../Controller/CreateCheckoutSession.js";
 import { getMyOrders, getOneOrder, OrderController, totalOrders, deleteOrders } from "../Controller/orderController.js";
 import AuthMiddleware from "../Services/AuthMiddleware.js";
-import Products from "../Models/productsSchema.js";
 import isAdmin from "../isAdmin.js";
 const router = express.Router();
 
@@ -30,26 +29,6 @@ router.post("/create-checkout-session", createCheckoutSession);
 router.patch("/deletedProduct/:id", AuthMiddleware, isAdmin, deletedProduct);
 router.patch("/inActive/:id", AuthMiddleware, isAdmin, inActiveProduct);
 router.patch("/updateProducts", AuthMiddleware, isAdmin, uploads.single("image"), UpdateProduct);
-router.patch("/products/:id", AuthMiddleware, isAdmin, async (req, res) => {
-  try {
-    const product = await Products.findByIdAndUpdate(
-      req.params.id,
-
-      { returnDocument: "after" }
-    );
-
-    res.json({
-      success: true,
-      product,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
 //Delete
 router.delete("/deleteOrder/:id", AuthMiddleware, isAdmin, deleteOrders);
 

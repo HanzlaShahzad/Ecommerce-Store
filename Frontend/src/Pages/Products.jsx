@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import api from "../utils/api";
+import { getProductImageUrl } from "../utils/productImage";
 import {
   Search,
   Settings,
@@ -83,11 +84,7 @@ export default function Products() {
   // --------------------------------------------------
 
   const getImageUrl = (image) => {
-    if (!image) {
-      return "/placeholder-product.png";
-    }
-
-    return `http://localhost:2000/uploads/${image}`;
+    return getProductImageUrl(image);
   };
 
   // --------------------------------------------------
@@ -271,7 +268,12 @@ export default function Products() {
       setLoadingId(id);
       setActionType("status");
 
-      await axios.patch(`http://localhost:2000/inActive/${id}`);
+      const token = localStorage.getItem("token");
+      await api.patch(
+        `/inActive/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
 
       // Refresh Redux
       await dispatch(getProductThunk());
@@ -436,7 +438,9 @@ export default function Products() {
                 <tbody className="divide-y divide-gray-100">
                   {products.length > 0 ? (
                     products.map((product) => {
-                      const isDisabled = product?.status === "Inactive";
+                      const isDisabled =
+                        product?.status === "Inactive" ||
+                        product?.status === "InActive";
 
                       const isLoading = loadingId === product?._id;
 
@@ -615,7 +619,9 @@ export default function Products() {
           <div className="space-y-3 md:hidden">
             {products.length > 0 ? (
               products.map((product) => {
-                const isDisabled = product?.status === "Inactive";
+                const isDisabled =
+                  product?.status === "Inactive" ||
+                  product?.status === "InActive";
 
                 const isLoading = loadingId === product?._id;
 

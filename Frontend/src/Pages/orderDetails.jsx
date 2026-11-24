@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 
 import { deleteOrder, specificOrder } from "../Thunks/stripeThunk";
+import { getProductImageUrl } from "../utils/productImage";
 
 import {
   ArrowLeft,
@@ -287,7 +288,7 @@ export default function OrderDetails() {
                           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md border border-gray-100 bg-gray-50">
                             {product?.image ? (
                               <img
-                                src={`http://localhost:2000/uploads/${product.image}`}
+                                src={getProductImageUrl(product.image)}
                                 alt={product?.name || "Product"}
                                 className="h-full w-full object-cover"
                               />
@@ -415,7 +416,7 @@ export default function OrderDetails() {
                 {order?.user?.image ? (
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
                     <img
-                      src={`http://localhost:2000/uploads/${order.user.image}`}
+                      src={getProductImageUrl(order.user.image)}
                       alt={customerName}
                       className="h-full w-full object-cover"
                     />

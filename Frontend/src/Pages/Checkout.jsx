@@ -2,6 +2,7 @@ import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOrder, stripeThunk } from "../Thunks/stripeThunk";
 import { clearCart } from "../Slices/cartSlice";
+import { getProductImageUrl } from "../utils/productImage";
 
 export default function Checkout() {
   const dispatch = useDispatch();
@@ -303,7 +304,7 @@ export default function Checkout() {
 
                       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                         <img
-                          src={`http://localhost:2000/uploads/${product.image}`}
+                          src={getProductImageUrl(product.image)}
                           alt={product.name}
                           className="h-full w-full object-cover"
                         />

@@ -1,16 +1,38 @@
 import Order from "../Models/OrderSchema.js";
+import mongoose from "mongoose";
+import { normalizeMongoId } from "../Utils/mongoId.js";
 
 export const OrderController = async (req, res) => {
   try {
     const { cartItems, totalPrice } = req.body;
-    const formattedCartItems = cartItems.map((item) => ({
-      product: item.product || item._id,
-      cartQuantity: item.cartQuantity,
-    }));
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      return res.status(400).json({ success: false, message: "Cart is empty" });
+    }
+
+    const formattedCartItems = cartItems.map((item) => {
+      const productId = normalizeMongoId(item?.product ?? item?._id);
+      if (!mongoose.Types.ObjectId.isValid(productId)) {
+        return null;
+      }
+
+      return {
+        product: productId,
+        cartQuantity: Math.max(1, Number(item.cartQuantity) || 1),
+      };
+    });
+
+    if (formattedCartItems.some((item) => item === null)) {
+      return res.status(400).json({ success: false, message: "Cart contains an invalid product ID" });
+    }
+
+    if (!Number.isFinite(Number(totalPrice)) || Number(totalPrice) < 0) {
+      return res.status(400).json({ success: false, message: "Invalid order total" });
+    }
+
     const order = await Order.create({
-      user: req.user.id,
+      user: req.user._id,
       cartItems: formattedCartItems,
-      totalPrice,
+      totalPrice: Number(totalPrice),
       paymentStatus: "unpaid",
       orderStatus: "pending",
     });
