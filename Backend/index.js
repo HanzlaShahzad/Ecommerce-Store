@@ -18,11 +18,10 @@ const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 const allowedOrigins = [
   process.env.FRONTEND_URL?.trim().replace(/\/+$/, ""),
   "https://shop-nest.hanzlashahzad41.workers.dev",
+  "http://localhost:5173"
 ].filter(Boolean);
 
-if (process.env.NODE_ENV !== "production") {
-  allowedOrigins.push("http://localhost:5173");
-}
+
 
 app.use(
   cors({
@@ -114,4 +113,5 @@ app.use((error, req, res, next) => {
 });
 
 // 9. Export Express application for Vercel
+app.listen(2000, () => console.log("Port Running"));
 export default app;

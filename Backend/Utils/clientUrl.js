@@ -1,5 +1,7 @@
 const DEFAULT_CLIENT_URL =
-  "https://shop-nest.hanzlashahzad41.workers.dev";
+  process.env.NODE_ENV === "production"
+    ? "https://shop-nest.hanzlashahzad41.workers.dev"
+    : "http://localhost:5173";
 
 export default function getClientUrl() {
   return (

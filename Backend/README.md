@@ -19,7 +19,7 @@ production credentials in source control:
 | --- | --- |
 | `MONGO_URI` | MongoDB Atlas connection string |
 | `SECRET` | Long, random JWT signing secret |
-| `FRONTEND_URL` | Exact deployed frontend origin, including `https://` |
+| `FRONTEND_URL` | Frontend origin allowed by CORS (local default: `http://localhost:5173`) |
 | `CLIENT_URL` | Frontend base URL used by verification and Stripe redirects |
 | `STRIPE_SECRET_KEY` | Stripe secret API key |
 | `WEBHOOK_SECRET_KEY` | Signing secret for the Stripe `/stripe-webhook` endpoint |
@@ -29,12 +29,12 @@ production credentials in source control:
 | `CLoudinary_Api_Key` | Cloudinary API key |
 | `CLoudinary_Api_Secret` | Cloudinary API secret |
 
-For this deployment, set `FRONTEND_URL` and `CLIENT_URL` to
-`https://shop-nest.hanzlashahzad41.workers.dev` and
-`VITE_API_URL` in the frontend to
-`https://ecommerce-store-coral-ten.vercel.app`. Set the Vercel variables in
-Project Settings > Environment Variables, then redeploy. The backend also
-allows the Cloudflare origin by default for CORS. Configure the Stripe webhook
-to call
-`https://ecommerce-store-coral-ten.vercel.app/stripe-webhook` and copy its
-signing secret into `WEBHOOK_SECRET_KEY`.
+For local development, set `FRONTEND_URL` and `CLIENT_URL` to
+`http://localhost:5173`. The frontend API defaults to `http://localhost:2000`.
+For the current deployment, set `FRONTEND_URL` and `CLIENT_URL` in Vercel to
+`https://shop-nest.hanzlashahzad41.workers.dev`, and set the frontend's
+`VITE_API_URL` to `https://shop-nest-git-main-hanzla-s-team.vercel.app`.
+Disable Vercel Deployment Protection for the API deployment so browser requests
+from the storefront do not get redirected to Vercel SSO. Configure the Stripe
+webhook endpoint as
+`https://shop-nest-git-main-hanzla-s-team.vercel.app/stripe-webhook`.
