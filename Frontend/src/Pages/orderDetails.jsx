@@ -15,7 +15,6 @@ import {
   Phone,
   Package,
   Trash2,
-  User,
   Pencil,
 } from "lucide-react";
 
@@ -30,8 +29,6 @@ export default function OrderDetails() {
   useEffect(() => {
     dispatch(specificOrder({ id }));
   }, [dispatch, id]);
-
-  console.log("Orderrrrr", order);
 
   // ------------------------------------------
   // DATA
@@ -108,14 +105,13 @@ export default function OrderDetails() {
       await dispatch(deleteOrder({ id: order._id })).unwrap();
       navigate("/orders");
     } catch (error) {
-      console.error("DELETE ORDER ERROR:", error);
       alert(error?.message || "Failed to delete order.");
     }
   };
 
   if (!order) {
     return (
-      <div className="lg:ml-[250px] flex min-h-screen items-center justify-center bg-[#f5f6f8]">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 lg:ml-64">
         <div className="text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow">
             <Package size={22} className="text-gray-400" />
@@ -128,7 +124,7 @@ export default function OrderDetails() {
   }
 
   return (
-    <div className="lg:ml-[250px] h-screen overflow-hidden bg-[#f5f6f8]">
+    <div className="min-h-screen bg-slate-50 lg:ml-64">
       {/* =====================================================
           MAIN CONTAINER
       ====================================================== */}
@@ -264,7 +260,8 @@ export default function OrderDetails() {
 
                     const quantity = Number(item?.cartQuantity) || 0;
 
-                    const price = Number(product?.price) || 0;
+                    const price =
+                      Number(item?.unitPrice ?? product?.price) || 0;
 
                     const itemTotal = price * quantity;
 
@@ -358,18 +355,12 @@ export default function OrderDetails() {
                         .reduce(
                           (total, item) =>
                             total +
-                            (Number(item?.product?.price) || 0) *
+                        (Number(item?.unitPrice ?? item?.product?.price) || 0) *
                               (Number(item?.cartQuantity) || 0),
                           0,
                         )
                         .toLocaleString()}
                     </span>
-                  </div>
-
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#697a8d]">Discount:</span>
-
-                    <span className="font-semibold text-[#566a7f]">Rs. 0</span>
                   </div>
 
                   <div className="flex justify-between text-sm">

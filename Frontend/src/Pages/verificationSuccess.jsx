@@ -1,6 +1,8 @@
+import { Link } from "react-router-dom";
+
 export default function VerificationSuccess() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
+    <div className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-4 lg:ml-64">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
         {/* Green Tick */}
         <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
@@ -39,12 +41,12 @@ export default function VerificationSuccess() {
         </div>
 
         {/* Sign In Button */}
-        <button
-          onClick={() => (window.location.href = "/signin")}
-          className="w-full rounded-lg bg-gray-900 px-5 py-3 font-semibold text-white transition duration-200 hover:bg-gray-800"
+        <Link
+          to="/signin"
+          className="block w-full rounded-xl bg-orange-600 px-5 py-3 font-semibold text-white transition duration-200 hover:bg-orange-700"
         >
           Continue to Sign In
-        </button>
+        </Link>
       </div>
     </div>
   );

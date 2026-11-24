@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
 
 import Home from "./Pages/Home";
 import Signin from "./Pages/Signin";
@@ -86,7 +86,11 @@ function App() {
         },
         {
           path: "/checkout",
-          element: <Checkout />,
+          element: (
+            <ProtectedRoute allowedRoles={["Admin", "User"]}>
+              <Checkout />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/success",
@@ -98,13 +102,17 @@ function App() {
         },
         {
           path: "/myOrders",
-          element: <MyOrders />,
+          element: (
+            <ProtectedRoute allowedRoles={["Admin", "User"]}>
+              <MyOrders />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/products",
           element: (
             <ProtectedRoute>
-              <Products />,
+              <Products />
             </ProtectedRoute>
           ),
         },
@@ -112,7 +120,7 @@ function App() {
           path: "/orders",
           element: (
             <ProtectedRoute>
-              <TotalOrders />,
+              <TotalOrders />
             </ProtectedRoute>
           ),
         },
@@ -120,8 +128,30 @@ function App() {
           path: "/users",
           element: (
             <ProtectedRoute>
-              <AllUsers />,
+              <AllUsers />
             </ProtectedRoute>
+          ),
+        },
+        {
+          path: "*",
+          element: (
+            <main className="mx-auto flex min-h-[55vh] max-w-3xl flex-col items-center justify-center px-6 text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-600">
+                404 · Page not found
+              </p>
+              <h1 className="mt-3 text-3xl font-bold text-slate-950">
+                This page doesn’t exist
+              </h1>
+              <p className="mt-2 text-slate-600">
+                The link may be incorrect, or the page may have moved.
+              </p>
+              <Link
+                to="/"
+                className="mt-6 rounded-xl bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
+              >
+                Back to the store
+              </Link>
+            </main>
           ),
         },
       ],

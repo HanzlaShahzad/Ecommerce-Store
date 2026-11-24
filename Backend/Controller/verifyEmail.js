@@ -13,7 +13,7 @@ export default async function verifyEmail(req, res) {
 
     const user = await User.findOne({
       verificationToken: token,
-    });
+    }).select("+verificationToken +verificationTokenExpires");
 
     // Token does not exist
     if (!user) {
@@ -62,12 +62,11 @@ export default async function verifyEmail(req, res) {
     });
 
   } catch (error) {
-    console.log("Verify Email Error =>", error);
+    console.error("Email verification failed:", error.message);
 
     return res.status(500).json({
       success: false,
-      message:
-        error.message || "Email verification failed.",
+      message: "Email verification failed.",
     });
   }
 }

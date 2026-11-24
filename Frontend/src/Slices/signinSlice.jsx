@@ -12,11 +12,11 @@ export const signinUserSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
-      ((state.data = null),
-        (state.pending = null),
-        (state.error = null),
-        (state.token = null),
-        localStorage.removeItem("token"));
+      state.data = null;
+      state.pending = false;
+      state.error = false;
+      state.token = null;
+      localStorage.removeItem("token");
     },
   },
   extraReducers: (builder) => {

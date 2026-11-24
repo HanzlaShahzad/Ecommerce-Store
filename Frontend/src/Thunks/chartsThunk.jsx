@@ -7,12 +7,8 @@ export const getChartThunk = createAsyncThunk(
     try {
       const res = await URL.get("/dashboard/revenue");
 
-      console.log("Chart RESPONSE =>", res.data);
-
       return res.data;
     } catch (error) {
-      console.log("getChartThunk Error =>", error);
-
       return rejectWithValue(
         error?.response?.data?.message || "getChartThunk Failed",
       );

@@ -24,8 +24,6 @@ export default function VerifyEmail() {
           setErrorMessage(res.data?.message || "Email verification failed.");
         }
       } catch (error) {
-        console.log("Verification Error:", error);
-
         setErrorMessage(
           error?.response?.data?.message ||
             error?.response?.data?.msg ||
@@ -39,18 +37,12 @@ export default function VerifyEmail() {
       }
     };
 
-    if (!token) {
-      setErrorMessage("Verification token is missing.");
-      setLoading(false);
-      return;
-    }
-
-    verifyEmail();
+    if (token) verifyEmail();
   }, [token]);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
+      <div className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-4 lg:ml-64">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
           <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-black" />
 
@@ -66,7 +58,7 @@ export default function VerifyEmail() {
 
   if (verified) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
+      <div className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-4 lg:ml-64">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
           {/* GREEN CHECK */}
 
@@ -121,7 +113,7 @@ export default function VerifyEmail() {
   // ==========================================
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-8">
+    <div className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-4 py-8 lg:ml-64">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-xl sm:p-8">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-500">

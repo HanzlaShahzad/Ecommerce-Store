@@ -14,10 +14,12 @@ const app = express();
 const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 // 1. CORS configuration
-const allowedOrigins = [
-  "http://localhost:5173",
-  process.env.FRONTEND_URL,
-];
+const allowedOrigins = [process.env.FRONTEND_URL?.replace(/\/+$/, "")].filter(
+  Boolean,
+);
+if (process.env.NODE_ENV !== "production") {
+  allowedOrigins.push("http://localhost:5173");
+}
 
 app.use(
   cors({
@@ -84,7 +86,7 @@ app.use("/", router);
 
 // 6. Error handling
 app.use((error, req, res, next) => {
-  console.error("API Error:", error);
+  console.error("API Error:", error.message);
 
   res.status(500).json({
     success: false,
@@ -92,7 +94,7 @@ app.use((error, req, res, next) => {
   });
 });
 
-app.listen(2000);
+app.listen(process.env.PORT || 2000);
 
 // 7. Export Express application for Vercel
 export default app;

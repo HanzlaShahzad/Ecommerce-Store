@@ -1,164 +1,45 @@
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaTwitter,
-  FaGithub,
-  FaMapMarkerAlt,
-  FaPhoneAlt,
-  FaEnvelope,
-  FaCcVisa,
-  FaCcMastercard,
-  FaCcPaypal,
-} from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { Mail, MapPin, Phone } from "lucide-react";
 
-const Footer = () => {
-  return (
-    <footer
-      className="
-        mt-10
-        w-full
-        bg-[#f9fafb]
-        text-slate-950
-        lg:ml-[260px]
-        lg:w-[calc(100%-260px)]
-      "
-    >
-      <div className="bg-gray-300 w-full h-[1px]"></div>
-      <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 lg:px-8">
-        {/* MAIN FOOTER */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div>
-            <h2 className="text-xl font-extrabold">
-              Ecommerce
-              <span className="text-orange-500">Store</span>
-            </h2>
-
-            <p className="mt-2 text-xs leading-5 text-slate-400">
-              Quality products at amazing prices. Shop easily and securely.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider">
-              Quick Links
-            </h3>
-
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
-              <a href="/" className="transition hover:text-orange-500">
-                Home
-              </a>
-
-              <a href="/products" className="transition hover:text-orange-500">
-                Products
-              </a>
-
-              <a href="/about" className="transition hover:text-orange-500">
-                About
-              </a>
-
-              <a href="/contact" className="transition hover:text-orange-500">
-                Contact
-              </a>
-            </div>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider">
-              Contact
-            </h3>
-
-            <div className="mt-2 space-y-1.5 text-xs text-slate-400">
-              <p className="flex items-center gap-2">
-                <FaMapMarkerAlt className="shrink-0 text-orange-500" />
-                Lahore, Pakistan
-              </p>
-
-              <p className="flex items-center gap-2">
-                <FaPhoneAlt className="shrink-0 text-orange-500" />
-                +92 300 0000000
-              </p>
-
-              <p className="flex items-center gap-2 break-all">
-                <FaEnvelope className="shrink-0 text-orange-500" />
-                support@shopnest.com
-              </p>
-            </div>
-          </div>
-
-          {/* Social */}
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider">
-              Follow Us
-            </h3>
-
-            <div className="mt-3 flex gap-2">
-              <a
-                href="#"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-white text-xs transition hover:bg-orange-500"
-              >
-                <FaFacebookF />
-              </a>
-
-              <a
-                href="#"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-white text-xs transition hover:bg-orange-500"
-              >
-                <FaInstagram />
-              </a>
-
-              <a
-                href="#"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-white text-xs transition hover:bg-orange-500"
-              >
-                <FaTwitter />
-              </a>
-
-              <a
-                href="#"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-white text-xs transition hover:bg-orange-500"
-              >
-                <FaGithub />
-              </a>
-            </div>
-          </div>
-        </div>
+const Footer = () => (
+  <footer className="mt-12 border-t border-slate-200 bg-white lg:ml-64">
+    <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-10">
+      <div className="sm:col-span-2">
+        <Link to="/" className="text-xl font-extrabold tracking-tight text-slate-950">
+          ShopNest<span className="text-orange-600">.</span>
+        </Link>
+        <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">
+          Thoughtfully chosen essentials, straightforward shopping, and secure
+          checkout from the first click to delivery.
+        </p>
       </div>
 
-      {/* Bottom */}
-      <div className="border-t border-slate-800">
-        <div
-          className="
-            mx-auto
-            flex
-            max-w-7xl
-            flex-col
-            items-center
-            justify-between
-            gap-2
-            px-5
-            py-3
-            text-center
-            sm:flex-row
-            sm:px-6
-            lg:px-8
-          "
-        >
-          <p className="text-[11px] text-slate-500">
-            © {new Date().getFullYear()} ShopNest. All rights reserved.
-          </p>
+      <div>
+        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+          Explore
+        </h2>
+        <nav className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-600">
+          <Link to="/" className="transition hover:text-orange-600">Home</Link>
+          <Link to="/contact" className="transition hover:text-orange-600">Contact</Link>
+        </nav>
+      </div>
 
-          <div className="flex gap-2 text-xl text-slate-500">
-            <FaCcVisa />
-            <FaCcMastercard />
-            <FaCcPaypal />
-          </div>
+      <div>
+        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+          Get in touch
+        </h2>
+        <div className="mt-4 space-y-3 text-sm text-slate-600">
+          <p className="flex items-center gap-2"><MapPin size={16} className="text-orange-600" /> Lahore, Pakistan</p>
+          <p className="flex items-center gap-2"><Phone size={16} className="text-orange-600" /> +92 300 0000000</p>
+          <p className="flex items-center gap-2 break-all"><Mail size={16} className="shrink-0 text-orange-600" /> support@shopnest.com</p>
         </div>
       </div>
-    </footer>
-  );
-};
+    </div>
+
+    <div className="border-t border-slate-100 px-5 py-4 text-center text-xs text-slate-400 sm:px-8 lg:px-10">
+      © {new Date().getFullYear()} ShopNest. All rights reserved.
+    </div>
+  </footer>
+);
 
 export default Footer;

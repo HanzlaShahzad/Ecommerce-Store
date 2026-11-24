@@ -1,7 +1,10 @@
 import axios from "axios";
+import { isSessionTokenValid } from "./auth";
 
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 export const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:2000"
+  configuredApiUrl ||
+  (import.meta.env.DEV ? "http://localhost:2000" : window.location.origin)
 ).replace(/\/+$/, "");
 
 function normalizeExtendedJson(value) {
@@ -29,6 +32,16 @@ function normalizeExtendedJson(value) {
 }
 
 const api = axios.create({ baseURL: API_BASE_URL });
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (isSessionTokenValid(token)) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else if (token) {
+    localStorage.removeItem("token");
+  }
+  return config;
+});
 
 api.interceptors.response.use((response) => {
   response.data = normalizeExtendedJson(response.data);

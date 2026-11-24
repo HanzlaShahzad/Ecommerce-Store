@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signinThunk } from "../Thunks/userThunk";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Signin() {
-  const user = useSelector((state) => state.signin.data?.user);
-  console.log(user);
+  const pending = useSelector((state) => state.signin.pending);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -17,6 +16,7 @@ export default function Signin() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // =========================
   // SIGN IN
@@ -35,16 +35,9 @@ export default function Signin() {
           password,
         }),
       ).unwrap();
-      console.log("loggedUser====>", loggedUser);
-
-      if (loggedUser?.user?.role === "Admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      const defaultPath = loggedUser?.user?.role === "Admin" ? "/admin" : "/";
+      navigate(location.state?.from?.pathname || defaultPath, { replace: true });
     } catch (error) {
-      console.log("Signin failed:", error);
-
       // Shake animation
       setVibrate(true);
 
@@ -76,22 +69,19 @@ export default function Signin() {
     navigate(`/verify-email?email=${encodeURIComponent(email)}`);
   };
 
-  useEffect(() => {
-    dispatch(signinThunk());
-  }, [dispatch]);
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 px-4 pt-2">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-10">
+      <div className="pointer-events-none absolute -right-32 top-0 h-96 w-96 rounded-full bg-orange-500/20 blur-3xl" />
+      <div className="relative w-full max-w-md">
         {/* =========================
             HEADER
         ========================= */}
 
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Welcome back</h1>
 
-          <p className="mt-2 text-sm text-gray-500">
-            Sign in to your account to continue
+          <p className="mt-2 text-sm text-slate-300">
+            Sign in to continue to your ShopNest account.
           </p>
         </div>
 
@@ -102,7 +92,7 @@ export default function Signin() {
         <div
           className={`${
             vibrate ? "animate-[vibrate_0.25s_ease-in-out]" : ""
-          } rounded-2xl border border-gray-200 bg-white p-3 shadow-xl shadow-gray-200/50 sm:p-8`}
+          } rounded-3xl border border-white/60 bg-white p-5 shadow-2xl shadow-black/20 sm:p-8`}
         >
           <form className="space-y-3" onSubmit={handleSubmit}>
             {/* =========================
@@ -116,6 +106,8 @@ export default function Signin() {
 
               <input
                 type="email"
+                required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -124,7 +116,7 @@ export default function Signin() {
                   setShowVerifyButton(false);
                 }}
                 placeholder="you@example.com"
-                className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-black focus:bg-white focus:ring-2 focus:ring-gray-200"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
               />
             </div>
 
@@ -139,6 +131,8 @@ export default function Signin() {
 
               <input
                 type="password"
+                required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -147,7 +141,7 @@ export default function Signin() {
                   setShowVerifyButton(false);
                 }}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-black focus:bg-white focus:ring-2 focus:ring-gray-200"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
               />
             </div>
 
@@ -197,27 +191,16 @@ export default function Signin() {
                 REMEMBER ME
             ========================= */}
 
-            <div className="flex items-center gap-2">
-              <input
-                id="remember"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 accent-black"
-              />
-
-              <label htmlFor="remember" className="text-sm text-gray-600">
-                Remember me
-              </label>
-            </div>
-
             {/* =========================
                 SIGN IN BUTTON
             ========================= */}
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-black px-4 py-3.5 font-semibold text-white shadow-lg transition duration-200 hover:bg-gray-800 hover:shadow-xl active:scale-[0.98]"
+              disabled={pending}
+              className="w-full rounded-xl bg-orange-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-orange-600/15 transition duration-200 hover:bg-orange-700 hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Sign In
+              {pending ? "Signing in…" : "Sign in"}
             </button>
           </form>
 

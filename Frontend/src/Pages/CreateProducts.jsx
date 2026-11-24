@@ -11,6 +11,8 @@ export default function CreateProducts() {
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [description, setDescription] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
   // Calculate final price after discount
   const discountPrice =
@@ -20,6 +22,8 @@ export default function CreateProducts() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFeedback("");
+    setIsSubmitting(true);
 
     try {
       await dispatch(
@@ -28,7 +32,6 @@ export default function CreateProducts() {
           file,
           discount,
           price,
-          discountPrice,
           quantity,
           description,
         }),
@@ -40,21 +43,34 @@ export default function CreateProducts() {
       setPrice("");
       setQuantity("");
       setDescription("");
+      setFeedback("Product added successfully.");
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error("Product creation failed:", error);
+      setFeedback(
+        typeof error === "string"
+          ? error
+          : error?.message || "Product could not be added. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-lg max-h-[50%]  px-4 py-5 lg:ms-110">
-      <div className="mx-auto max-w-2xl rounded-2xl bg-white py-4 px-8 shadow-lg">
-        <h1 className="mb-1 text-3xl font-bold text-gray-800">Add Product</h1>
+    <div className="min-h-[65vh] bg-slate-50 px-4 py-10 lg:ml-64 sm:px-6">
+      <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <h1 className="mb-1 text-3xl font-bold text-slate-950">Add a product</h1>
 
-        <form className="space-y-2" onSubmit={handleSubmit}>
+        {feedback && (
+          <p role="status" className={`mb-4 rounded-xl px-4 py-3 text-sm ${feedback.includes("successfully") ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+            {feedback}
+          </p>
+        )}
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Name */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -81,7 +97,8 @@ export default function CreateProducts() {
 
               <input
                 type="number"
-                min="0"
+                min="0.01"
+                step="0.01"
                 required
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
@@ -99,6 +116,7 @@ export default function CreateProducts() {
               <input
                 type="number"
                 min="0"
+                step="1"
                 max="100"
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
@@ -173,9 +191,10 @@ export default function CreateProducts() {
           {/* Button */}
           <button
             type="submit"
-            className="w-full rounded-lg bg-indigo-600 py-1 font-semibold text-white transition hover:bg-indigo-700"
+            disabled={isSubmitting}
+            className="w-full rounded-xl bg-orange-600 py-3 font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Add Product
+            {isSubmitting ? "Adding product…" : "Add product"}
           </button>
         </form>
       </div>

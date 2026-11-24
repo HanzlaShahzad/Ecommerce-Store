@@ -9,6 +9,7 @@ const productSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true,
+    min: 0.01,
   },
   description: {
     type: String,
@@ -26,6 +27,8 @@ const productSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     required: true,
+    min: 0,
+    validate: Number.isInteger,
   },
   image: {
     type: String,
@@ -34,6 +37,8 @@ const productSchema = new mongoose.Schema({
   discount: {
     type: Number,
     required: false,
+    min: 0,
+    max: 100,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

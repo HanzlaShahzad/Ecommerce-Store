@@ -16,6 +16,11 @@ const orderSchema = new mongoose.Schema(
         cartQuantity: {
           type: Number,
           default: 1,
+          min: 1,
+        },
+        unitPrice: {
+          type: Number,
+          min: 0,
         },
       },
     ],
@@ -23,6 +28,7 @@ const orderSchema = new mongoose.Schema(
     totalPrice: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     paymentStatus: {

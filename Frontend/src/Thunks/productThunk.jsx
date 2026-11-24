@@ -30,8 +30,6 @@ export const createProductThunk = createAsyncThunk(
 
       return res.data;
     } catch (error) {
-      console.log("createProductThunk Error =>", error);
-
       return rejectWithValue(
         error?.response?.data?.message || "createProductThunk Failed",
       );
@@ -45,12 +43,8 @@ export const getProductThunk = createAsyncThunk(
     try {
       const res = await URL.get("/products");
 
-      console.log("GET PRODUCTS RESPONSE =>", res.data);
-
       return res.data.products;
     } catch (error) {
-      console.log("getProductThunk Error =>", error);
-
       return rejectWithValue(
         error?.response?.data?.message || "getProductThunk Failed",
       );
@@ -76,8 +70,6 @@ export const deleteProductThunk = createAsyncThunk(
 
       return id;
     } catch (error) {
-      console.error("deleteProductThunk Error =>", error);
-
       return rejectWithValue(
         error?.response?.data?.message || "Failed to delete product",
       );
@@ -98,12 +90,8 @@ export const updateProductThunk = createAsyncThunk(
         },
       });
 
-      console.log("updateProductThunk RESPONSE =>", res.data);
-
       return res.data;
     } catch (error) {
-      console.log("updateProductThunk Error =>", error);
-
       return rejectWithValue(
         error?.response?.data?.message || "updateProductThunk Failed",
       );

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Settings, ShoppingCart, Tag } from "lucide-react";
+import { ShoppingCart, Tag } from "lucide-react";
 import RevenueChart from "../components/Charts/revenueCharts";
 import { MdPendingActions, MdCrisisAlert } from "react-icons/md";
 import { TbTruckDelivery } from "react-icons/tb";
@@ -9,8 +9,6 @@ import { getUser } from "../Thunks/userThunk";
 
 const Dashboard = () => {
   const order = useSelector((state) => state.totalOrders?.totalOrder);
-
-  const user = useSelector((state) => state.signin?.data?.user);
 
   const dispatch = useDispatch();
 
@@ -26,7 +24,10 @@ const Dashboard = () => {
   // TOTAL SALES
   // =========================================================
   const total = orders.reduce(
-    (sum, item) => sum + (Number(item?.totalPrice) || 0),
+    (sum, item) =>
+      item?.paymentStatus === "paid"
+        ? sum + (Number(item?.totalPrice) || 0)
+        : sum,
     0,
   );
 
@@ -65,13 +66,12 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-[#f4f5f7] text-[#53657a]">
+    <div className="min-h-[65vh] bg-slate-50 text-slate-700">
       {/* =====================================================
           MAIN AREA
       ===================================================== */}
       <main
         className="
-          h-full
           min-w-0
           lg:ml-[260px]
           lg:w-[calc(100%-260px)]
@@ -79,13 +79,12 @@ const Dashboard = () => {
       >
         <section
           className="
-            h-full
-            overflow-y-auto
+            min-h-full
             p-3
 
             sm:p-4
 
-            lg:overflow-hidden
+            lg:overflow-visible
             lg:p-4
 
             xl:p-5
@@ -482,38 +481,6 @@ const Dashboard = () => {
         </section>
       </main>
 
-      {/* =====================================================
-          SETTINGS BUTTON
-      ===================================================== */}
-      <button
-        type="button"
-        className="
-          fixed
-          right-0
-          top-1/2
-          z-40
-          flex
-          h-11
-          w-11
-          -translate-y-1/2
-          items-center
-          justify-center
-          rounded-l-xl
-          bg-[#5b8def]
-          text-white
-          shadow-lg
-          transition
-          hover:bg-[#4d7fe0]
-
-          sm:h-12
-          sm:w-12
-
-          lg:h-14
-          lg:w-14
-        "
-      >
-        <Settings size={21} />
-      </button>
     </div>
   );
 };

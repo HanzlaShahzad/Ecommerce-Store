@@ -4,7 +4,6 @@ import api from "../utils/api";
 import { getProductImageUrl } from "../utils/productImage";
 import {
   Search,
-  Settings,
   X,
   Tag,
   Edit,
@@ -169,8 +168,8 @@ export default function Products() {
       return;
     }
 
-    if (Number.isNaN(price) || price < 0) {
-      alert("Please enter a valid price.");
+    if (Number.isNaN(price) || price <= 0) {
+      alert("Please enter a price greater than zero.");
       return;
     }
 
@@ -215,8 +214,6 @@ export default function Products() {
 
       handleCloseEdit();
     } catch (error) {
-      console.error("UPDATE PRODUCT ERROR:", error);
-
       alert(
         error?.message ||
           error?.response?.data?.message ||
@@ -234,6 +231,9 @@ export default function Products() {
 
   const handleDeleteProduct = async (product) => {
     if (!product?._id) return;
+    if (!window.confirm(`Remove "${product.name}" from the storefront?`)) {
+      return;
+    }
 
     try {
       setLoadingId(product._id);
@@ -243,8 +243,6 @@ export default function Products() {
 
       alert("Product deleted successfully.");
     } catch (error) {
-      console.error("DELETE PRODUCT ERROR:", error);
-
       alert(
         error?.message ||
           error?.response?.data?.message ||
@@ -278,8 +276,6 @@ export default function Products() {
       // Refresh Redux
       await dispatch(getProductThunk());
     } catch (error) {
-      console.error("STATUS UPDATE ERROR:", error);
-
       alert(
         error?.response?.data?.message || "Failed to update product status.",
       );
@@ -308,7 +304,7 @@ export default function Products() {
   // --------------------------------------------------
 
   return (
-    <div className="min-h-screen bg-gray-100 lg:ml-[250px]">
+    <div className="min-h-screen bg-slate-50 lg:ml-64">
       <main className="w-full min-w-0 p-3 sm:p-4 md:p-5 lg:p-6">
         <div className="mx-auto w-full max-w-7xl">
           {/* =========================================
@@ -335,10 +331,24 @@ export default function Products() {
 
               {/* SEARCH */}
 
-              <div className="px-8 lg:max-w-sm">
+              <div className="flex flex-col gap-2 sm:flex-row lg:max-w-xl">
+                <label className="relative block min-w-0 flex-1">
+                  <Search
+                    size={17}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Search products"
+                    aria-label="Search products"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                  />
+                </label>
                 <Link
                   to="/createProducts"
-                  className="bg-cyan-500 rounded-xl text-center flex justify-center items-center px-6 py-2 text-white"
+                  className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
                 >
                   Add Product
                 </Link>

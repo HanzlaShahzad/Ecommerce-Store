@@ -11,11 +11,9 @@ export default function MyOrders() {
 
   useEffect(() => {
     if (user?._id) {
-      dispatch(getOrder({ id: user._id }));
+      dispatch(getOrder());
     }
-  }, [dispatch]);
-
-  console.log("Orders =>", orders);
+  }, [dispatch, user?._id]);
 
   if (pending) {
     return (
@@ -73,7 +71,7 @@ export default function MyOrders() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-3 py-5 sm:px-5 md:px-8 lg:px-10 lg:ml-[250px] ">
+    <div className="min-h-screen bg-slate-50 px-3 py-5 sm:px-5 md:px-8 lg:ml-64 lg:px-10">
       {user ? (
         <div className="mx-auto w-full max-w-6xl">
           {/* Header */}
@@ -153,6 +151,8 @@ export default function MyOrders() {
                       order.cartItems.length > 0 ? (
                         order.cartItems.map((item, productIndex) => {
                           const product = item?.product;
+                          const unitPrice =
+                            Number(item?.unitPrice ?? product?.price) || 0;
 
                           return (
                             <div
@@ -187,10 +187,7 @@ export default function MyOrders() {
 
                                 <div className="mt-2 flex flex-wrap items-center gap-2">
                                   <span className="text-sm font-bold text-orange-600">
-                                    Rs.{" "}
-                                    {Number(
-                                      product?.price || 0,
-                                    ).toLocaleString()}
+                                    Rs. {unitPrice.toLocaleString()} each
                                   </span>
 
                                   <span className="rounded-full bg-orange-100 px-2 py-1 text-xs font-bold text-orange-600">

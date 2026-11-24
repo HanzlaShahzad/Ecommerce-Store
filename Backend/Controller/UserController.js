@@ -7,21 +7,30 @@ import sendVerificationEmail from "../Utils/sendEmail.js";
 // Create User / Signup
 // ===============================
 export const UserController = async (req, res) => {
+  let accountCreated = false;
   try {
-    const { name, username, email, password } = req.body;
-    console.log("=================================");
-    console.log("EMAIL RECEIVED FROM FRONTEND:", email);
-    console.log("REQUEST BODY:", req.body);
-    console.log("=================================");
+    const { name, username, email, password } = req.body || {};
+    const normalizedName = typeof name === "string" ? name.trim() : "";
+    const normalizedUsername = typeof username === "string" ? username.trim() : "";
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    if (
+      !normalizedName ||
+      !normalizedUsername ||
+      !normalizedEmail ||
+      typeof password !== "string" ||
+      password.length < 8
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, username, valid email, and a password of at least 8 characters are required.",
+      });
+    }
 
     const verificationToken = randomBytes(32).toString("hex");
-
-    const verificationTokenExpires = new Date(
-      Date.now() + 15 * 60 * 1000
-    );
+    const verificationTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
 
     // Check name and username
-    if (name === username) {
+    if (normalizedName.toLowerCase() === normalizedUsername.toLowerCase()) {
       return res.status(400).json({
         success: false,
         message:
@@ -30,10 +39,9 @@ export const UserController = async (req, res) => {
     }
 
     // Validate email
-    const emailRegex =
-      /^[A-Za-z0-9]+([.-][A-Za-z0-9]+)*@[A-Za-z0-9]+\.[A-Za-z]{2,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
         message: "Please enter a valid email address.",
@@ -41,7 +49,8 @@ export const UserController = async (req, res) => {
     }
 
     // Check if email already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail })
+      .collation({ locale: "en", strength: 2 });
 
     if (existingUser) {
       return res.status(409).json({
@@ -52,9 +61,9 @@ export const UserController = async (req, res) => {
 
     // Create user
     const user = await User.create({
-      name,
-      username,
-      email,
+      name: normalizedName,
+      username: normalizedUsername,
+      email: normalizedEmail,
       password,
 
       // Email verification fields
@@ -62,13 +71,10 @@ export const UserController = async (req, res) => {
       verificationToken,
       verificationTokenExpires,
     });
+    accountCreated = true;
 
     // Send verification email
-    await sendVerificationEmail(email, verificationToken);
-
-    console.log("User created:", user._id);
-    console.log("Email verified:", user.emailVerified);
-    console.log("Verification token:", verificationToken);
+    await sendVerificationEmail(normalizedEmail, verificationToken);
 
     return res.status(201).json({
       success: true,
@@ -77,11 +83,27 @@ export const UserController = async (req, res) => {
         "Account created successfully. Please check your email to verify your account.",
     });
   } catch (error) {
-    console.log("User Creation Error =>", error);
+    console.error("User creation failed:", error.message);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with that email or username already exists.",
+      });
+    }
+
+    if (accountCreated) {
+      return res.status(503).json({
+        success: false,
+        accountCreated: true,
+        message:
+          "Your account was created, but the verification email could not be sent. Check the email service settings, then resend the verification email.",
+      });
+    }
 
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to create your account right now.",
     });
   }
 };
@@ -92,10 +114,19 @@ export const UserController = async (req, res) => {
 // ===============================
 export const Signin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const body = req.body || {};
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const password = body.password;
+    if (!email || typeof password !== "string" || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required.",
+      });
+    }
 
     // 1. Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email })
+      .collation({ locale: "en", strength: 2 });
 
     if (!user) {
       return res.status(404).json({
@@ -113,29 +144,30 @@ export const Signin = async (req, res) => {
     }
 
     // 3. Check password
-    const userMatchPassword =
-      await User.matchPasswordAndCreateToken({
-        email,
-        password,
+    const passwordMatches = await User.matchPassword({ email, password });
+    if (!passwordMatches) {
+      return res.status(401).json({
+        success: false,
+        message: "Email or password is incorrect.",
       });
+    }
 
     // 4. Generate JWT token
     const token = TokenForUser(user);
 
     return res.status(200).json({
       success: true,
-      userMatchPassword,
       user,
       token,
       emailVerified: true,
       message: "Successfully signed in.",
     });
   } catch (error) {
-    console.log("Signin Error:", error);
+    console.error("Signin failed:", error.message);
 
-    return res.status(400).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to sign in right now.",
     });
   }
 };
@@ -163,7 +195,11 @@ export const GetUsers = async (req, res) => {
       {
         $project: {
           password: 0,
+          salt: 0,
+          verificationToken: 0,
+          verificationTokenExpires: 0,
           orders: 0,
+          __v: 0,
         },
       },
     ]);
@@ -173,11 +209,11 @@ export const GetUsers = async (req, res) => {
       users,
     });
   } catch (error) {
-    console.log("Get Users Error =>", error);
+    console.error("Get users failed:", error.message);
 
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to load users.",
     });
   }
 };

@@ -21,11 +21,13 @@ export const ProductController = async (req, res) => {
       description,
       user: req.user?._id,
     });
-    console.log("Product =>", product);
     return res.status(200).json({ product });
   } catch (error) {
-    console.log("Product Creation Error =>", error);
-    return res.status(500).json({ error });
+    console.error("Product creation failed:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to create product.",
+    });
   };
 };
 
@@ -35,8 +37,11 @@ export const GetProducts = async (req, res) => {
     const products = await Products.find();
     return res.status(200).json({ products: products });
   } catch (error) {
-    console.log("Get Product Error =>", error);
-    return res.status(500).json({ error });
+    console.error("Get products failed:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to load products.",
+    });
   }
 };
 export const UpdateProduct = async (req, res) => {
@@ -80,7 +85,7 @@ export const UpdateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
-    console.log("Update Product Error =>", error);
+    console.error("Update product failed:", error.message);
 
     res.status(500).json({
       success: false,
@@ -107,7 +112,11 @@ export const deletedProduct = async (req, res) => {
     }
     return res.status(200).json({ deleted, msg: "Deleted Successfully" });
   } catch (error) {
-    return res.status(500).json({ error, msg: "Deleted false" })
+    console.error("Soft-delete product failed:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to update product status.",
+    });
   }
 }
 
@@ -122,7 +131,11 @@ export const deleteProduct = async (req, res) => {
       });
     }
 
-    const product = await Products.findByIdAndDelete(id);
+    const product = await Products.findByIdAndUpdate(
+      id,
+      { deleted: true, status: "Inactive" },
+      { new: true, runValidators: true },
+    );
 
     if (!product) {
       return res.status(404).json({
@@ -137,7 +150,7 @@ export const deleteProduct = async (req, res) => {
       message: "Product deleted successfully",
     });
   } catch (error) {
-    console.error("Delete Product Error =>", error);
+    console.error("Delete product failed:", error.message);
     return res.status(500).json({
       success: false,
       message: "Failed to delete product",

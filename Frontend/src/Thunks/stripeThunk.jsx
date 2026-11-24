@@ -3,36 +3,39 @@ import URL from "../utils/api";
 
 export const stripeThunk = createAsyncThunk(
   "stripeThunk",
-  async ({ cartItems, orderId }, { rejectWithValue }) => {
+  async ({ orderId }, { rejectWithValue }) => {
     try {
-      console.log("STRIPE THUNK ORDER ID =====>", orderId);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return rejectWithValue({ message: "Please sign in before checkout." });
+      }
 
       const res = await URL.post("/create-checkout-session", {
-        cartItems,
         orderId,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-
-      console.log("STRIPE RESPONSE =====>", res.data);
 
       if (res.data?.url) {
         window.location.href = res.data.url;
+      } else {
+        return rejectWithValue({ message: "Checkout did not return a payment link." });
       }
 
       return res.data;
     } catch (error) {
-      console.log(
-        "STRIPE ERROR =====>",
-        error?.response?.data || error.message,
+      return rejectWithValue(
+        error?.response?.data || { message: error.message || "Stripe checkout failed." },
       );
-
-      return rejectWithValue(error?.response?.data || "Stripe checkout failed");
     }
   },
 );
 
 export const createOrder = createAsyncThunk(
   "createOrder",
-  async ({ cartItems, totalPrice }, { rejectWithValue }) => {
+  async ({ cartItems }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
 
@@ -40,7 +43,6 @@ export const createOrder = createAsyncThunk(
         "/create-orders",
         {
           cartItems,
-          totalPrice,
         },
         {
           headers: {
@@ -49,16 +51,11 @@ export const createOrder = createAsyncThunk(
         },
       );
 
-      console.log("ORDER API RESPONSE =====>", res.data);
-
       return res.data;
     } catch (error) {
-      console.log(
-        "CREATE ORDER ERROR =====>",
-        error?.response?.data || error.message,
+      return rejectWithValue(
+        error?.response?.data || { message: error.message || "Order creation failed." },
       );
-
-      return rejectWithValue(error?.response?.data || "Order creation failed");
     }
   },
 );
@@ -66,7 +63,7 @@ export const createOrder = createAsyncThunk(
 export const getOrder = createAsyncThunk(
   "getOrder",
 
-  async ({ id }, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
 
@@ -76,7 +73,7 @@ export const getOrder = createAsyncThunk(
         });
       }
 
-      const res = await URL.get(`/myOrders/${id}`, {
+      const res = await URL.get("/myOrders", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -84,14 +81,31 @@ export const getOrder = createAsyncThunk(
 
       return res.data.orders;
     } catch (error) {
-      console.log("GET ORDER ERROR =>", error);
-
-      console.log("BACKEND ERROR =>", error.response?.data);
-
       return rejectWithValue(
         error.response?.data || {
           message: error.message,
         },
+      );
+    }
+  },
+);
+
+export const getUserOrders = createAsyncThunk(
+  "getUserOrders",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return rejectWithValue({ message: "Authentication required." });
+      }
+
+      const res = await URL.get(`/users/${id}/orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data.orders;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: error.message || "Unable to load user orders." },
       );
     }
   },
@@ -115,13 +129,8 @@ export const totalOrder = createAsyncThunk(
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Total Order =>", res.data.orders);
       return res.data.orders;
     } catch (error) {
-      console.log("totalOrder ERROR =>", error);
-
-      console.log("BACKEND ERROR =>", error.response?.data);
-
       return rejectWithValue(
         error.response?.data || {
           message: error.message,
@@ -149,13 +158,8 @@ export const specificOrder = createAsyncThunk(
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("specificOrder =>", res.data.specificOrder);
       return res.data.specificOrder;
     } catch (error) {
-      console.log("specificOrder ERROR =>", error);
-
-      console.log("BACKEND ERROR =>", error.response?.data);
-
       return rejectWithValue(
         error.response?.data || {
           message: error.message,
@@ -183,7 +187,6 @@ export const deleteOrder = createAsyncThunk(
 
       return { id };
     } catch (error) {
-      console.error("DELETE ORDER ERROR:", error);
       return rejectWithValue(
         error.response?.data || { message: error.message },
       );

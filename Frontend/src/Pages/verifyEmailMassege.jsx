@@ -6,7 +6,11 @@ export default function VerifyEmailMessage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [email, setEmail] = useState(location.state?.email || "");
+  const [email, setEmail] = useState(
+    location.state?.email ||
+      new URLSearchParams(location.search).get("email") ||
+      "",
+  );
 
   const [resending, setResending] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -58,8 +62,6 @@ export default function VerifyEmailMessage() {
       // Start another 15 second countdown
       setCountdown(15);
     } catch (error) {
-      console.log("Resend Error:", error);
-
       setErrorMessage(
         error?.response?.data?.message ||
           error?.response?.data?.msg ||
@@ -72,7 +74,7 @@ export default function VerifyEmailMessage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-8">
+    <div className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-4 py-8 lg:ml-64">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-xl sm:p-8">
         {/* EMAIL ICON */}
 

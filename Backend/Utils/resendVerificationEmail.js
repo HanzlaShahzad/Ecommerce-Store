@@ -4,13 +4,18 @@ import sendEmailVerification from "./sendEmail.js";
 
 export const ResendVerificationEmail = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email } = req.body || {};
 
-    const user = await User.findOne({ email });
-    console.log("=================================");
-    console.log("RESEND EMAIL RECEIVED:", email);
-    console.log("REQUEST BODY:", req.body);
-    console.log("=================================");
+    if (typeof email !== "string" || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid email address is required.",
+      });
+    }
+
+    const user = await User.findOne({ email: email.trim().toLowerCase() })
+      .collation({ locale: "en", strength: 2 })
+      .select("+verificationToken +verificationTokenExpires");
 
     if (!user) {
       return res.status(404).json({
@@ -44,11 +49,11 @@ export const ResendVerificationEmail = async (req, res) => {
       message: "A new verification email has been sent.",
     });
   } catch (error) {
-    console.log("Resend Verification Error:", error);
+    console.error("Resend verification failed:", error.message);
 
-    return res.status(500).json({
+    return res.status(503).json({
       success: false,
-      message: error.message,
+      message: "The verification email could not be sent. Please try again later.",
     });
   }
 };

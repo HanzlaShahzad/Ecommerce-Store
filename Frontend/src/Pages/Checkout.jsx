@@ -1,58 +1,67 @@
-import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { createOrder, stripeThunk } from "../Thunks/stripeThunk";
-import { clearCart } from "../Slices/cartSlice";
 import { getProductImageUrl } from "../utils/productImage";
 
 export default function Checkout() {
   const dispatch = useDispatch();
-  const location = useLocation();
   const navigate = useNavigate();
-
-  const cartItems = location.state?.cartItems || [];
+  const cartItems = useSelector((state) => state.cart.cartItems);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [verifiedTotal, setVerifiedTotal] = useState(null);
 
   // ================= STRIPE =================
 
   const handleStripe = async () => {
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0 || isSubmitting) return;
 
     try {
+      setIsSubmitting(true);
+      setCheckoutError("");
+
       // Create order in MongoDB
       const orderResult = await dispatch(
         createOrder({
           cartItems,
-          totalPrice: total,
         }),
       ).unwrap();
-      console.log("ORDER RESULT =====>", orderResult);
 
-      // Get MongoDB _id
-      const orderId = orderResult?.order?._id;
-
-      console.log("ORDER ID =====>", orderId);
+      const order = orderResult?.order;
+      const orderId = order?._id;
 
       if (!orderId) {
-        console.log("ORDER ID NOT FOUND");
+        throw new Error("Order creation did not return an order ID.");
+      }
+
+      const serverTotal = Number(order.totalPrice);
+      if (!Number.isFinite(serverTotal)) {
+        throw new Error("The server returned an invalid order total.");
+      }
+
+      const displayedTotal = verifiedTotal ?? total;
+      if (Math.abs(serverTotal - displayedTotal) > 0.01) {
+        setVerifiedTotal(serverTotal);
+        setCheckoutError(
+          `Prices were updated. Review the new total of Rs. ${serverTotal.toLocaleString()} and place your order again.`,
+        );
         return;
       }
 
-      // Prepare Stripe items
-      const stripeItems = cartItems.map((item) => ({
-        ...item,
-        quantity: Number(item.cartQuantity) || 1,
-      }));
-
-      // Send orderId to Stripe
       await dispatch(
         stripeThunk({
-          cartItems: stripeItems,
           orderId: orderId,
         }),
       ).unwrap();
-      dispatch(clearCart());
-      cartItems.filter((val) => val === stripeItems);
     } catch (error) {
-      console.log("CHECKOUT ERROR =====>", error);
+      setCheckoutError(
+        typeof error === "string"
+          ? error
+          : error?.message || "Unable to start checkout. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -80,6 +89,7 @@ export default function Checkout() {
   const deliveryCharges = cartItems.length > 0 ? 200 : 0;
 
   const total = subTotal + deliveryCharges;
+  const amountDue = verifiedTotal ?? total;
 
   const totalItems = cartItems.reduce(
     (total, item) => total + (Number(item.cartQuantity) || 1),
@@ -90,7 +100,7 @@ export default function Checkout() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-4 lg:ml-64">
         <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-orange-50 text-4xl">
             🛒
@@ -117,7 +127,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:ml-[250px]">
+    <div className="min-h-screen bg-slate-50 lg:ml-64">
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <button
@@ -361,7 +371,7 @@ export default function Checkout() {
                   <span className="text-sm text-gray-500">Subtotal</span>
 
                   <span className="text-sm font-semibold text-gray-800">
-                    Rs. {subTotal.toLocaleString()}
+                    Rs. {(verifiedTotal === null ? subTotal : Math.max(0, verifiedTotal - deliveryCharges)).toLocaleString()}
                   </span>
                 </div>
 
@@ -394,20 +404,26 @@ export default function Checkout() {
                     </div>
 
                     <p className="text-2xl font-extrabold text-orange-600">
-                      Rs. {total.toLocaleString()}
+                      Rs. {amountDue.toLocaleString()}
                     </p>
                   </div>
                 </div>
 
                 {/* ================= PLACE ORDER ================= */}
 
+                {checkoutError && (
+                  <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {checkoutError}
+                  </p>
+                )}
+
                 <button
                   type="button"
-                  disabled={cartItems.length === 0}
+                  disabled={cartItems.length === 0 || isSubmitting}
                   onClick={handleStripe}
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-4 text-sm font-bold text-white shadow-md transition hover:bg-orange-600 hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
                 >
-                  <span>Place Order & Pay</span>
+                  <span>{isSubmitting ? "Starting secure checkout…" : "Place Order & Pay"}</span>
                   <span className="text-base">→</span>
                 </button>
 

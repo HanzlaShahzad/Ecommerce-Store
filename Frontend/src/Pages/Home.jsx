@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getProductThunk, updateProductThunk } from "../Thunks/productThunk";
+import { getProductThunk } from "../Thunks/productThunk";
 import { useNavigate } from "react-router-dom";
-import { FaDeleteLeft } from "react-icons/fa6";
-import { MdEditNote } from "react-icons/md";
 import { getProductImageUrl } from "../utils/productImage";
 import {
   addToCart,
   increaseQuantitys,
   decreaseQuantitys,
   removeFromCarts,
-  clearCart,
 } from "../Slices/cartSlice.jsx";
 
 export default function Home() {
@@ -21,7 +18,6 @@ export default function Home() {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const { token } = useSelector((state) => state.signin);
 
-  const [localProducts, setLocalProducts] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -30,13 +26,7 @@ export default function Home() {
     dispatch(getProductThunk());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (Array.isArray(data)) {
-      setLocalProducts(data);
-    }
-  }, [data]);
-
-  const products = localProducts.filter(
+  const products = (Array.isArray(data) ? data : []).filter(
     (product) =>
       product?.deleted !== true &&
       product?.status !== "Inactive" &&
@@ -88,7 +78,7 @@ export default function Home() {
   }, 0);
 
   const filteredProduct = products.filter((item) =>
-    item?.name.toLowerCase().includes(searchItem?.toLowerCase() || ""),
+    item?.name?.toLowerCase().includes(searchItem?.trim().toLowerCase() || ""),
   );
 
   return (
@@ -110,9 +100,41 @@ export default function Home() {
             ${cartOpen ? "lg:pr-[350px]" : ""}
           `}
         >
+          <section className="relative mb-8 overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-8 text-white shadow-xl shadow-slate-900/10 sm:px-9 sm:py-10 lg:px-12 lg:py-12">
+            <div className="pointer-events-none absolute -right-10 -top-20 h-72 w-72 rounded-full bg-orange-500/30 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 right-1/4 h-40 w-40 rounded-full bg-amber-300/10 blur-3xl" />
+            <div className="relative max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-orange-200">
+                Thoughtfully picked for you
+              </span>
+              <h1 className="mt-5 max-w-xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                Good finds. Better everyday.
+              </h1>
+              <p className="mt-3 max-w-lg text-sm leading-6 text-slate-300 sm:text-base">
+                Discover useful essentials, considered prices, and a smoother
+                way to shop the things you love.
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  document.getElementById("product-catalog")?.scrollIntoView({
+                    behavior: "smooth",
+                  })
+                }
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-orange-400"
+              >
+                Explore the collection <span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <div className="pointer-events-none absolute bottom-0 right-12 hidden h-56 w-56 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-8xl lg:flex">
+              ✨
+            </div>
+          </section>
+
           {/* HEADER */}
 
           <div
+            id="product-catalog"
             className="
               mb-5
               flex
@@ -203,7 +225,7 @@ export default function Home() {
 
           {/* PRODUCTS */}
 
-          {!pending && !error && products.length > 0 && (
+          {!pending && !error && filteredProduct.length > 0 && (
             <div
               className="
                   grid
@@ -233,13 +255,7 @@ export default function Home() {
                 return (
                   <div
                     key={product._id}
-                    className={`
-                        ${
-                          product.deleted === true
-                            ? "hidden"
-                            : "block group min-w-0 w-full h-auto cursor-pointer"
-                        }
-                      `}
+                    className="group min-w-0 w-full cursor-pointer rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg hover:shadow-slate-900/5"
                   >
                     {/* IMAGE */}
 
@@ -253,7 +269,7 @@ export default function Home() {
                           justify-center
                           overflow-hidden
                           rounded-xl
-                          bg-gray-100
+                          bg-slate-100
                           sm:h-[180px]
                           md:h-[175px]
                           lg:h-[190px]
@@ -271,10 +287,6 @@ export default function Home() {
                               transition
                               duration-300
                               group-hover:scale-105
-                              sm:w-[100%]
-                              h-full
-                              md:w-[100%]
-                              lg:w-full
                             "
                         />
                       ) : (
@@ -386,21 +398,9 @@ export default function Home() {
                         {product.name}
                       </h2>
 
-                      {/* RATING */}
-
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs">⭐⭐⭐⭐⭐</span>
-
-                        <span
-                          className="
-                              text-[11px]
-                              text-gray-500
-                              sm:text-xs
-                            "
-                        >
-                          4.8
-                        </span>
-                      </div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        ShopNest selection
+                      </p>
 
                       {/* PRICE */}
 
@@ -490,7 +490,7 @@ export default function Home() {
 
           {/* NO PRODUCTS */}
 
-          {!pending && !error && products.length === 0 && (
+          {!pending && !error && filteredProduct.length === 0 && (
             <div
               className="
                   flex
@@ -513,7 +513,7 @@ export default function Home() {
                     sm:text-xl
                   "
               >
-                No Products Found
+                {products.length === 0 ? "No Products Yet" : "No matching products"}
               </h2>
 
               <p
@@ -524,7 +524,9 @@ export default function Home() {
                     sm:text-sm
                   "
               >
-                Add products from the admin panel.
+                {products.length === 0
+                  ? "Our collection is being refreshed. Please check back soon."
+                  : "Try another search to find what you’re looking for."}
               </p>
             </div>
           )}

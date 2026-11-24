@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function Cancel() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-4 lg:ml-64">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg border border-gray-100">
         {/* Cancel Icon */}
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">

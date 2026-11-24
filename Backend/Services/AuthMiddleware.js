@@ -1,31 +1,47 @@
 import User from "../Models/usersSchema.js";
+import mongoose from "mongoose";
 import { VerifyToken } from "./authToken.js";
 
 export default async function AuthMiddleware(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: "Authorization header not found",
+        message: "A valid Bearer token is required.",
       });
     }
 
-    const token = authHeader.split(" ")[1];
-
+    const token = authHeader.slice("Bearer ".length).trim();
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "A valid Bearer token is required.",
+      });
+    }
     const decoded = VerifyToken(token);
+    if (
+      !mongoose.Types.ObjectId.isValid(decoded.id) ||
+      !Number.isInteger(decoded.exp)
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid authentication token.",
+      });
+    }
+
     const user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(403).json({ success: false, msg: "user not found" });
+      return res.status(401).json({
+        success: false,
+        message: "The account for this token no longer exists.",
+      });
     }
+
     req.user = user;
-
-    next();
+    return next();
   } catch (error) {
-    console.log("ERROR NAME:", error.name);
-    console.log("ERROR MESSAGE:", error.message);
-
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",

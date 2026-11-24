@@ -13,8 +13,9 @@ export const SignupThunk = createAsyncThunk(
       });
       return res.data;
     } catch (error) {
-      console.log("Signup Thunk Error => ", error);
-      return rejectWithValue(error?.response?.data?.massege || "Signup Failed");
+      return rejectWithValue(
+        error?.response?.data?.message || error?.message || "Signup Failed",
+      );
     }
   },
 );
@@ -31,12 +32,8 @@ export const signinThunk = createAsyncThunk(
 
       localStorage.setItem("token", res.data.token);
 
-      console.log("Signin Data:", res.data);
-
       return res.data;
     } catch (error) {
-      console.log("Signin Thunk Error =>", error);
-
       return rejectWithValue({
         status: error?.response?.status,
 
@@ -50,16 +47,21 @@ export const signinThunk = createAsyncThunk(
   },
 );
 
-export const getUser = createAsyncThunk("getUsers", async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const res = await URL.get("/users", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return res.data.users;
-  } catch (error) {
-    console.log("Get User Error :", error);
-  }
-});
+export const getUser = createAsyncThunk(
+  "getUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await URL.get("/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data.users;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Unable to load users.",
+      );
+    }
+  },
+);

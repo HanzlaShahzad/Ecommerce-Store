@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../Thunks/userThunk";
-import { getOrder } from "../Thunks/stripeThunk";
+import { getUserOrders } from "../Thunks/stripeThunk";
 import { getProductImageUrl } from "../utils/productImage";
 
 export default function AllUsers() {
@@ -19,12 +19,10 @@ export default function AllUsers() {
   }, [dispatch]);
 
   const users = Array.isArray(data) ? data : [];
-  const allOrders = Array.isArray(orders) ? orders : [];
-
   const selectedUserOrders = Array.isArray(orders) ? orders : [];
 
   const handleOrders = (user) => {
-    dispatch(getOrder({ id: user._id }));
+    dispatch(getUserOrders({ id: user._id }));
     setSelectedUser(user);
     setShowOrders(true);
   };
@@ -67,7 +65,7 @@ export default function AllUsers() {
       {/* MAIN PAGE */}
       {/* ================================================= */}
 
-      <div className="min-h-screen bg-gray-50 px-3 py-5 sm:px-5 lg:px-8 lg:ml-[235px]">
+      <div className="min-h-screen bg-slate-50 px-3 py-5 sm:px-5 lg:ml-64 lg:px-8">
         <div className="mx-auto max-w-7xl">
           {/* ============================================= */}
           {/* HEADER */}
@@ -237,13 +235,6 @@ export default function AllUsers() {
 
                 <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:hidden">
                   {users.map((user) => {
-                    const orderCount = allOrders.filter((order) => {
-                      const orderUserId =
-                        order?.user?._id || order?.user?.id || order?.user;
-
-                      return String(orderUserId) === String(user?._id);
-                    }).length;
-
                     return (
                       <div
                         key={user?._id}
@@ -585,6 +576,8 @@ export default function AllUsers() {
                             <div className="space-y-2">
                               {order.cartItems.map((item, productIndex) => {
                                 const product = item?.product;
+                                const unitPrice =
+                                  Number(item?.unitPrice ?? product?.price) || 0;
 
                                 return (
                                   <div
@@ -616,10 +609,7 @@ export default function AllUsers() {
                                       </p>
 
                                       <p className="mt-1 text-xs text-gray-400">
-                                        Rs.{" "}
-                                        {Number(
-                                          product?.price || 0,
-                                        ).toLocaleString()}
+                                        Rs. {unitPrice.toLocaleString()} each
                                       </p>
                                     </div>
 

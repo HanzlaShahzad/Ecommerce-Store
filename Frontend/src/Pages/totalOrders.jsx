@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { deleteOrder, totalOrder } from "../Thunks/stripeThunk";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   Search,
@@ -12,7 +12,6 @@ import {
   Download,
   CalendarDays,
   CheckCheck,
-  CreditCard,
   CircleAlert,
   Plus,
 } from "lucide-react";
@@ -31,8 +30,6 @@ export default function TotalOrders() {
   const [currentPage, setCurrentPage] = useState(1);
   const [plusorder, setPlusOrder] = useState([]);
   const [openPlus, setOpenPlus] = useState(false);
-  const [deleteBtn, setDeleteBtn] = useState(false);
-  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     dispatch(totalOrder());
@@ -58,12 +55,6 @@ export default function TotalOrders() {
         (order) =>
           order?.paymentStatus === "paid" || order?.orderStatus === "confirmed",
       ).length || 0
-    );
-  }, [orders]);
-
-  const refundedOrders = useMemo(() => {
-    return (
-      orders?.filter((order) => order?.paymentStatus === "refunded").length || 0
     );
   }, [orders]);
 
@@ -273,16 +264,23 @@ export default function TotalOrders() {
   };
 
   const handleDeleteOrder = async (id) => {
+    if (
+      !window.confirm(
+        "Delete this unpaid order? Orders with a payment session cannot be deleted.",
+      )
+    ) {
+      return;
+    }
+
     try {
       await dispatch(deleteOrder({ id })).unwrap();
     } catch (error) {
-      console.error("DELETE ORDER ERROR:", error);
       alert(error?.message || "Failed to delete order.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] lg:ml-[250px]">
+    <div className="min-h-screen bg-slate-50 lg:ml-64">
       {openPlus && (
         <div
           className="

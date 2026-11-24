@@ -1,27 +1,30 @@
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
 export default async function sendEmailVerification(email, token) {
   try {
-    const verificationUrl = `${process.env.CLIENT_URL.trim()}/verify-email/${token}`;
+    const emailUser = process.env.EMAIL_USER?.trim();
+    const emailPass = process.env.EMAIL_PASS?.replace(/\s/g, "");
+    const clientUrl = process.env.CLIENT_URL?.trim();
 
-    console.log("=================================");
-    console.log("SENDING EMAIL");
-    console.log("FROM:", process.env.EMAIL_USER);
-    console.log("TO:", email);
-    console.log("=================================");
+    if (!emailUser || !emailPass || !clientUrl) {
+      throw new Error(
+        "Email service is not configured. Set EMAIL_USER, EMAIL_PASS, and CLIENT_URL.",
+      );
+    }
 
-    const info = await transporter.sendMail({
-      from: `"MyShop" <${process.env.EMAIL_USER}>`,
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+    });
 
-      // IMPORTANT: This is the signup user's email
+    const verificationUrl = `${clientUrl}/verify-email/${token}`;
+
+    return await transporter.sendMail({
+      from: `"MyShop" <${emailUser}>`,
+
       to: email,
 
       subject: "Verify Your Email - MyShop",
@@ -88,18 +91,8 @@ This verification link will expire in 15 minutes.`,
       `,
     });
 
-    console.log("=================================");
-    console.log("EMAIL SENT SUCCESSFULLY");
-    console.log("FROM:", process.env.EMAIL_USER);
-    console.log("TO:", email);
-    console.log("Accepted:", info.accepted);
-    console.log("Rejected:", info.rejected);
-    console.log("Message ID:", info.messageId);
-    console.log("=================================");
-
-    return info;
   } catch (error) {
-    console.log("EMAIL SENDING ERROR:", error);
+    console.error("Email sending failed:", error.message);
     throw error;
   }
 }
