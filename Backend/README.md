@@ -30,7 +30,7 @@ production credentials in source control:
 | `CLoudinary_Api_Secret` | Cloudinary API secret |
 
 For this deployment, set `FRONTEND_URL` and `CLIENT_URL` to
-`https://ecommerce-store.hanzlashahzad41.workers.dev` and
+`https://shop-nest.hanzlashahzad41.workers.dev` and
 `VITE_API_URL` in the frontend to
 `https://ecommerce-store-coral-ten.vercel.app`. Set the Vercel variables in
 Project Settings > Environment Variables, then redeploy. The backend also

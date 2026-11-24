@@ -1,5 +1,5 @@
 const DEFAULT_CLIENT_URL =
-  "https://ecommerce-store.hanzlashahzad41.workers.dev";
+  "https://shop-nest.hanzlashahzad41.workers.dev";
 
 export default function getClientUrl() {
   return (
