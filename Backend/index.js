@@ -11,12 +11,14 @@ import router from "./Routes/router.js";
 import StripeWebhook from "./Controller/stripeWebhook.js";
 
 const app = express();
+
 const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 // 1. CORS configuration
-const allowedOrigins = [process.env.FRONTEND_URL?.replace(/\/+$/, "")].filter(
-  Boolean,
-);
+const allowedOrigins = [
+  process.env.FRONTEND_URL?.replace(/\/+$/, ""),
+].filter(Boolean);
+
 if (process.env.NODE_ENV !== "production") {
   allowedOrigins.push("http://localhost:5173");
 }
@@ -36,7 +38,7 @@ app.use(
   })
 );
 
-// 2. MongoDB connection (reused between requests)
+// 2. MongoDB connection (reused between serverless requests)
 let mongoConnectionPromise;
 
 const connectDB = async () => {
@@ -44,9 +46,16 @@ const connectDB = async () => {
     return;
   }
 
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI environment variable is missing");
+  }
+
   if (!mongoConnectionPromise) {
     mongoConnectionPromise = mongoose
-      .connect(process.env.MONGO_URI).then(() => console.log('MongoDB Connected Successfuly'))
+      .connect(process.env.MONGO_URI)
+      .then(() => {
+        console.log("MongoDB Connected Successfully");
+      })
       .catch((error) => {
         mongoConnectionPromise = null;
         throw error;
@@ -60,7 +69,7 @@ mongoose.connection.on("disconnected", () => {
   mongoConnectionPromise = null;
 });
 
-// Connect before handling API requests
+// 3. Connect to MongoDB before handling API requests
 app.use(async (req, res, next) => {
   try {
     await connectDB();
@@ -70,23 +79,32 @@ app.use(async (req, res, next) => {
   }
 });
 
-// 3. Stripe webhook (raw body must come before express.json)
+// 4. Stripe webhook (raw body must come before express.json)
 app.post(
   "/stripe-webhook",
   express.raw({ type: "application/json" }),
   StripeWebhook
 );
 
-// 4. JSON middleware
+// 5. JSON middleware
 app.use(express.json());
-app.use("/uploads", express.static(path.join(backendDirectory, "uploads")));
 
-// 5. Application routes
+// 6. Static uploads
+app.use(
+  "/uploads",
+  express.static(path.join(backendDirectory, "uploads"))
+);
+
+// 7. Application routes
 app.use("/", router);
 
-// 6. Error handling
+// 8. Error handling
 app.use((error, req, res, next) => {
   console.error("API Error:", error.message);
+
+  if (res.headersSent) {
+    return next(error);
+  }
 
   res.status(500).json({
     success: false,
@@ -94,7 +112,5 @@ app.use((error, req, res, next) => {
   });
 });
 
-app.listen(process.env.PORT || 2000);
-
-// 7. Export Express application for Vercel
+// 9. Export Express application for Vercel
 export default app;
