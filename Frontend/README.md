@@ -10,6 +10,8 @@ npm run dev
 Set `VITE_API_URL` to the backend origin when the API is hosted separately, for
 example `https://api.example.com`. If it is omitted, development uses
 `http://localhost:2000` and a production build uses the current site origin.
+The production build in this repository uses the deployed API at
+`https://ecommerce-store-coral-ten.vercel.app`.
 
 ## Production build
 
